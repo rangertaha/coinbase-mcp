@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "coinbase": {
+      "command": "go",
+      "args": ["run", "./cmd/coinbase", "mcp"]
+    }
+  }
+}
