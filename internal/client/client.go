@@ -26,8 +26,9 @@ const defaultTimeout = 60 * time.Second
 
 // Authorizer applies authentication credentials to an outgoing request.
 type Authorizer interface {
-	// Authorize mutates the request to carry authentication.
-	Authorize(*http.Request)
+	// Authorize mutates the request to carry authentication. It may fail,
+	// e.g. when credentials must be signed per request.
+	Authorize(*http.Request) error
 }
 
 // Client is a reusable JSON REST client bound to a base URL and an Authorizer.
@@ -153,12 +154,23 @@ func (r *RawBody) String() string { return string(r.Bytes) }
 // buildRequest assembles an *http.Request from a Request.
 func (c *Client) buildRequest(ctx context.Context, req Request) (*http.Request, error) {
 	u := *c.base
-	u.Path = joinPath(c.base.Path, req.Path)
+	// req.Path may contain percent-escaped segments (e.g. a url.PathEscape'd
+	// ID). Parse the joined path so both the decoded (Path) and encoded
+	// (RawPath) forms are populated; assigning Path alone would re-escape '%'
+	// when the URL is serialized.
+	rel, err := url.Parse(joinPath(c.base.Path, req.Path))
+	if err != nil {
+		return nil, fmt.Errorf("invalid request path %q: %w", req.Path, err)
+	}
+	u.Path, u.RawPath = rel.Path, rel.RawPath
 
-	if len(req.Query) > 0 {
-		q := url.Values{}
-		for k, v := range req.Query {
-			q[k] = v
+	// Honor a query string embedded in req.Path, merged with req.Query.
+	if rel.RawQuery != "" || len(req.Query) > 0 {
+		q := rel.Query()
+		for k, vs := range req.Query {
+			for _, v := range vs {
+				q.Add(k, v)
+			}
 		}
 		u.RawQuery = q.Encode()
 	}
@@ -180,12 +192,15 @@ func (c *Client) buildRequest(ctx context.Context, req Request) (*http.Request, 
 		httpReq.Header.Set("User-Agent", c.userAgent)
 	}
 	for k, vs := range c.header {
+		httpReq.Header.Del(k)
 		for _, v := range vs {
-			httpReq.Header.Set(k, v)
+			httpReq.Header.Add(k, v)
 		}
 	}
 	if c.auth != nil {
-		c.auth.Authorize(httpReq)
+		if err := c.auth.Authorize(httpReq); err != nil {
+			return nil, fmt.Errorf("authorizing request: %w", err)
+		}
 	}
 	// Caller-supplied headers take precedence over defaults.
 	for k, vs := range req.Header {

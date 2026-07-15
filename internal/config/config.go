@@ -22,6 +22,7 @@ const (
 	EnvAPISecret = "COINBASE_API_SECRET" // CDP API private key (optional)
 	EnvBaseURL   = "COINBASE_BASE_URL"   // override the API base URL
 	EnvToolsets  = "COINBASE_TOOLSETS"   // comma-separated toolset names, or "all"
+	EnvTools     = "COINBASE_TOOLS"      // comma-separated individual tool names (allowlist)
 	EnvReadOnly  = "COINBASE_READONLY"   // "true" disables all write tools
 )
 
@@ -38,6 +39,9 @@ type Config struct {
 	BaseURL string
 	// Toolsets is the set of enabled toolset names. A nil/empty set means "all".
 	Toolsets []string
+	// Tools, when non-empty, allowlists individual tool names within the
+	// enabled toolsets. Read-only mode still applies on top.
+	Tools []string
 	// ReadOnly, when true, suppresses mutating tools at registration time.
 	ReadOnly bool
 }
@@ -75,6 +79,7 @@ func Load() (*Config, error) {
 		APISecret: strings.TrimSpace(os.Getenv(EnvAPISecret)),
 		BaseURL:   strings.TrimRight(strings.TrimSpace(os.Getenv(EnvBaseURL)), "/"),
 		Toolsets:  splitList(os.Getenv(EnvToolsets)),
+		Tools:     splitList(os.Getenv(EnvTools)),
 		ReadOnly:  isTruthy(os.Getenv(EnvReadOnly)),
 	}
 	if cfg.BaseURL == "" {

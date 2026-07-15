@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"unicode/utf8"
 )
 
 // APIError is a structured error returned for any non-2xx HTTP response. It
@@ -75,10 +76,14 @@ func parseAPIError(method string, u *url.URL, status int, body []byte) *APIError
 	return e
 }
 
-// truncate shortens s to at most n bytes, appending an ellipsis when cut.
+// truncate shortens s to at most n bytes (never splitting a UTF-8 rune),
+// appending an ellipsis when cut.
 func truncate(s string, n int) string {
 	if len(s) <= n {
 		return s
+	}
+	for n > 0 && !utf8.RuneStart(s[n]) {
+		n--
 	}
 	return s[:n] + "…"
 }

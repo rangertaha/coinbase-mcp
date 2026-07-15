@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
-// Package internal holds build-wide values shared across ado-mcp, such as the
-// server version reported to MCP clients.
+// Package internal holds build-wide values shared across coinbase-mcp, such as
+// the server version reported to MCP clients.
 package internal
 
 import "runtime/debug"
@@ -18,14 +18,19 @@ var version string
 //
 //  1. the value injected at build time with -ldflags (release builds);
 //  2. the module version from the build info, e.g. when installed with
-//     `go install github.com/rangertaha/coinbase-mcp/cmd/ado@v1.2.3`;
+//     `go install github.com/rangertaha/coinbase-mcp/cmd/coinbase@v1.2.3`;
 //  3. a "dev" value annotated with the VCS revision when building from source.
 func Version() string {
-	if version != "" {
-		return version
-	}
-
 	bi, ok := debug.ReadBuildInfo()
+	return resolveVersion(version, bi, ok)
+}
+
+// resolveVersion implements Version's precedence rules; split out so every
+// branch is testable with synthetic build info.
+func resolveVersion(injected string, bi *debug.BuildInfo, ok bool) string {
+	if injected != "" {
+		return injected
+	}
 	if !ok {
 		return "dev"
 	}

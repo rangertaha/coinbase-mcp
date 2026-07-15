@@ -18,10 +18,12 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// Server is the ado-mcp application server.
+// Server is the coinbase-mcp application server.
 type Server struct {
 	mcp      *mcp.Server
 	readOnly bool
+	// toolFilter, when non-empty, allowlists individual tool names.
+	toolFilter map[string]bool
 
 	// registered counts the tools actually exposed (after read-only filtering).
 	registered int
@@ -31,12 +33,32 @@ type Server struct {
 	toolsets []string
 }
 
-// New creates a Server with the given name/version and read-only policy.
-func New(name, version string, readOnly bool) *Server {
+// New creates a Server with the given name/version and read-only policy. An
+// optional instructions string is surfaced to clients at initialization to
+// guide tool selection.
+func New(name, version string, readOnly bool, instructions ...string) *Server {
 	impl := &mcp.Implementation{Name: name, Version: version}
+	var opts *mcp.ServerOptions
+	if len(instructions) > 0 && instructions[0] != "" {
+		opts = &mcp.ServerOptions{Instructions: instructions[0]}
+	}
 	return &Server{
-		mcp:      mcp.NewServer(impl, nil),
+		mcp:      mcp.NewServer(impl, opts),
 		readOnly: readOnly,
+	}
+}
+
+// AllowTools restricts registration to the named tools. Call before
+// registering toolsets; an empty list means all tools. The read-only policy
+// still applies on top: a write tool stays hidden in read-only mode even when
+// explicitly allowed.
+func (s *Server) AllowTools(names []string) {
+	if len(names) == 0 {
+		return
+	}
+	s.toolFilter = make(map[string]bool, len(names))
+	for _, n := range names {
+		s.toolFilter[n] = true
 	}
 }
 
@@ -68,7 +90,7 @@ func (s *Server) Connect(ctx context.Context, t mcp.Transport) (*mcp.ServerSessi
 // ToolDef describes a tool to register. The zero value is a read-only,
 // non-destructive tool.
 type ToolDef struct {
-	// Name is the unique tool identifier, e.g. "wit_get_work_item".
+	// Name is the unique tool identifier, e.g. "products_get".
 	Name string
 	// Title is an optional human-readable display name.
 	Title string
@@ -95,6 +117,9 @@ type ToolDef struct {
 // to the client as a tool error rather than a protocol error.
 func Register[In, Out any](s *Server, def ToolDef, h mcp.ToolHandlerFor[In, Out]) {
 	if def.Write && s.readOnly {
+		return
+	}
+	if s.toolFilter != nil && !s.toolFilter[def.Name] {
 		return
 	}
 

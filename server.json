@@ -1,0 +1,65 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+  "name": "io.github.rangertaha/coinbase-mcp",
+  "title": "Coinbase MCP Server",
+  "description": "Coinbase Advanced Trade API as MCP tools: public market data plus authenticated accounts, orders, portfolios, convert, fees, payments, futures, and perpetuals. Written in Go; runs over stdio.",
+  "repository": {
+    "url": "https://github.com/rangertaha/coinbase-mcp",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/rangertaha/coinbase-mcp/releases",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "COINBASE_API_KEY",
+          "description": "CDP API key name from the Coinbase Developer Platform (organizations/{org}/apiKeys/{key}). Optional: public market-data tools work without it.",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "COINBASE_API_SECRET",
+          "description": "CDP API private key (ECDSA PEM or base64 Ed25519). Set together with COINBASE_API_KEY.",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "COINBASE_READONLY",
+          "description": "Set to true to hide every mutating tool (order placement, cancels, portfolio changes).",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "boolean"
+        },
+        {
+          "name": "COINBASE_TOOLSETS",
+          "description": "Comma-separated toolset names to enable (products, accounts, orders, portfolios, convert, fees, payments, futures, perpetuals, keys), or all (default).",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "COINBASE_TOOLS",
+          "description": "Comma-separated individual tool names to allowlist within the enabled toolsets.",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "COINBASE_BASE_URL",
+          "description": "Override the Coinbase API base URL (default https://api.coinbase.com).",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}

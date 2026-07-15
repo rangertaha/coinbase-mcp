@@ -11,6 +11,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/signal"
@@ -27,6 +28,12 @@ import (
 )
 
 func main() {
+	os.Exit(run(context.Background(), os.Args, os.Stderr))
+}
+
+// run executes the CLI and returns the process exit code. It is split from
+// main so both outcomes are testable.
+func run(ctx context.Context, args []string, errOut io.Writer) int {
 	cmd := &cli.Command{
 		Name:    "coinbase",
 		Usage:   "Coinbase market data as an MCP server",
@@ -41,10 +48,11 @@ func main() {
 		ExitErrHandler: func(context.Context, *cli.Command, error) {},
 	}
 
-	if err := cmd.Run(context.Background(), os.Args); err != nil {
-		fmt.Fprintf(os.Stderr, "coinbase: %v\n", err)
-		os.Exit(1)
+	if err := cmd.Run(ctx, args); err != nil {
+		_, _ = fmt.Fprintf(errOut, "coinbase: %v\n", err)
+		return 1
 	}
+	return 0
 }
 
 // mcpCommand runs the MCP server over stdio.
@@ -68,7 +76,7 @@ func runMCP(ctx context.Context, _ *cli.Command) error {
 	}
 
 	ver := internal.Version()
-	srv, cleanup, err := app.Assemble(cfg, ver)
+	srv, cleanup, err := app.Assemble(ctx, cfg, ver)
 	if err != nil {
 		return err
 	}

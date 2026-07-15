@@ -10,4 +10,8 @@ import "github.com/rangertaha/coinbase-mcp/internal/coinbase"
 type Toolset struct {
 	Name     string
 	Register func(s *Server, c *coinbase.Clients)
+	// Auth marks toolsets whose every tool needs API credentials. They are
+	// skipped when the server runs unauthenticated, so the model never sees
+	// tools that can only fail.
+	Auth bool
 }

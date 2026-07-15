@@ -31,8 +31,16 @@ func LoadEnvFile(path string) error {
 	defer func() { _ = f.Close() }()
 
 	sc := bufio.NewScanner(f)
+	first := true
 	for sc.Scan() {
-		line := strings.TrimSpace(sc.Text())
+		line := sc.Text()
+		if first {
+			// Editors on Windows often prepend a UTF-8 BOM; without this the
+			// first key would silently include it and never match.
+			line = strings.TrimPrefix(line, "\ufeff")
+			first = false
+		}
+		line = strings.TrimSpace(line)
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
