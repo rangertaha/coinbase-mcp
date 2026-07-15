@@ -4,22 +4,6 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/rangertaha/coinbase-mcp.svg)](https://pkg.go.dev/github.com/rangertaha/coinbase-mcp)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/rangertaha/coinbase-mcp)](go.mod)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Status: under construction](https://img.shields.io/badge/status-under%20construction-orange)](#toolsets)
-
-<div align="center">
-
-## 🚧 &nbsp; UNDER CONSTRUCTION &nbsp; 🚧
-
-**This server is a work in progress.**
-
-It runs over stdio with **10 toolsets (46 tools)** covering the Advanced Trade API:<br>
-public market data plus authenticated accounts, orders, portfolios, convert,<br>
-fees, payments, futures, and perpetuals. The authenticated toolsets are new<br>
-and not yet battle-tested against live accounts; tool names may still change.
-
-</div>
-
----
 
 A **Coinbase** [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server, written in Go, that exposes the Coinbase Advanced Trade API as tools an LLM client (Claude Desktop/Code, Cursor, and others) can call. See the [**Documentation**](https://rangertaha.github.io/coinbase-mcp/) for more details.
 

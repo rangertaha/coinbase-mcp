@@ -4,9 +4,6 @@
 
 A **Coinbase** [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server, written in Go, that exposes the Coinbase Advanced Trade API as tools an LLM client (Claude Desktop/Code, Cursor, and others) can call.
 
-!!! warning "Under construction"
-    This server is a work in progress. It runs over stdio with **10 toolsets (46 tools)** covering the Advanced Trade API — public market data plus authenticated accounts, orders, portfolios, convert, fees, payments, futures, and perpetuals. The authenticated toolsets are new and not yet battle-tested against live accounts; tool names may still change.
-
 Because market data is public, the server works out of the box with **no credentials at all** — install it, wire it into your MCP client, and ask about prices.
 
 ## Features
