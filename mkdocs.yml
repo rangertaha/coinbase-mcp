@@ -1,5 +1,5 @@
 site_name: coinbase-mcp
-site_description: An MCP server exposing coinbase headlines and search as tools an LLM client can call.
+site_description: An MCP server exposing the Coinbase Advanced Trade API as tools an LLM client can call.
 site_url: https://rangertaha.github.io/coinbase-mcp/
 repo_url: https://github.com/rangertaha/coinbase-mcp
 repo_name: rangertaha/coinbase-mcp
@@ -49,3 +49,9 @@ nav:
   - Home: index.md
   - Install: install.md
   - Configuration: configuration.md
+  - CLI: cli.md
+  - Toolsets: toolsets.md
+  - Tools: tools.md
+  - Prompts: prompts.md
+  - Architecture: architecture.md
+  - Development: development.md
